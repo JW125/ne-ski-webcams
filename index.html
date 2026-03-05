@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Northeast Ski Webcams & Snow Forecast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+header{text-align:center;padding:28px 20px 16px;border-bottom:1px solid #21262d}
+header h1{font-size:1.8rem;font-weight:700;letter-spacing:-0.5px}
+header h1 span.accent{background:linear-gradient(135deg,#58a6ff,#bc8cff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{color:#8b949e;margin-top:6px;font-size:0.85rem}
+.header-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;margin-top:12px}
+.refresh-label{display:flex;align-items:center;gap:6px;font-size:.82rem;color:#8b949e}
+.refresh-label select{font:inherit;padding:4px 8px;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#e6edf3;cursor:pointer}
+.refresh-label select:hover{border-color:#58a6ff}
+.btn-refresh{font:inherit;padding:5px 14px;background:rgba(88,166,255,.12);border:1px solid #58a6ff;border-radius:8px;color:#58a6ff;cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s}
+.btn-refresh:hover{background:#58a6ff;color:#0d1117}
+#updated{color:#484f58;font-size:0.72rem;margin-top:6px}
+.controls{text-align:center;padding:10px 20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.filter-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:5px 14px;border-radius:20px;cursor:pointer;font-size:0.78rem;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:#30363d;color:#e6edf3;border-color:#58a6ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px;padding:20px;max-width:1800px;margin:0 auto}
+@media(max-width:480px){.grid{grid-template-columns:1fr;padding:12px}}
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#1c2128;border-bottom:1px solid #30363d}
+.card-head h3{font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-head .meta{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px}
+.badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:700}
+.provider{font-size:.62rem;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06);color:#8b949e;font-family:monospace}
+.VT{background:#238636;color:#fff}.NH{background:#1f6feb;color:#fff}.ME{background:#da3633;color:#fff}.NY{background:#8957e5;color:#fff}
+.cam-feed{position:relative;aspect-ratio:16/10;background:#0d1117;overflow:hidden}
+.cam-feed img{display:block;width:100%;height:100%;object-fit:cover;background:#111}
+.cam-feed iframe{display:block;width:100%;height:100%;border:none}
+.cam-feed .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#131a27 0%,#0d1117 100%);color:#484f58;font-size:.85rem;gap:8px}
+.cam-feed .placeholder.error{color:#f85149}
+.cam-feed .placeholder a{color:#58a6ff;text-decoration:none;font-size:.78rem;padding:6px 16px;border:1px solid rgba(88,166,255,.3);border-radius:6px;transition:all .2s}
+.cam-feed .placeholder a:hover{background:rgba(88,166,255,.15)}
+.cam-updated{padding:3px 14px;font-size:.65rem;color:#484f58;font-family:monospace;border-top:1px solid #21262d}
+.forecast-strip{display:flex;border-top:1px solid #30363d}
+.fday{flex:1;padding:8px 2px;text-align:center;border-right:1px solid #21262d;position:relative}
+.fday:last-child{border-right:none}
+.fday.today{background:rgba(56,139,253,.08)}
+.fday .dt{font-size:.62rem;color:#8b949e;margin-bottom:2px;text-transform:uppercase}
+.fday .snow-icon{font-size:.85rem;line-height:1;margin-bottom:1px}
+.fday .amt{font-size:.88rem;font-weight:700}
+.fday .tag{font-size:.55rem;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.tag-past{color:#8b949e}.tag-today{color:#3fb950}.tag-fcast{color:#58a6ff}
+.s-zero .amt{color:#484f58}
+.s-trace .amt{color:#6cb6ff}
+.s-light .amt{color:#79c0ff}
+.s-mod .amt{color:#d2a8ff}
+.s-heavy .amt{color:#f0f6fc;text-shadow:0 0 6px rgba(255,255,255,.4)}
+.loading-strip{display:flex;align-items:center;justify-content:center;padding:18px;border-top:1px solid #30363d;color:#484f58;font-size:.78rem;gap:8px}
+.loading-strip .spinner{width:14px;height:14px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-strip{padding:12px;text-align:center;border-top:1px solid #30363d;color:#f85149;font-size:.75rem}
+footer{text-align:center;padding:28px;color:#484f58;font-size:.78rem;border-top:1px solid #21262d}
+footer a{color:#58a6ff;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+<h1><span class="accent">Northeast Ski Webcams</span> & Snow Forecast</h1>
+<p>Live webcam feeds + 6-day snowfall (3 past + 3 forecast) via Open-Meteo</p>
+<div class="header-actions">
+  <label class="refresh-label">
+    <span>Refresh images every</span>
+    <select id="refreshInterval">
+      <option value="60000">1 min</option>
+      <option value="120000">2 min</option>
+      <option value="300000" selected>5 min</option>
+      <option value="600000">10 min</option>
+    </select>
+  </label>
+  <button type="button" id="refreshNow" class="btn-refresh">Refresh now</button>
+</div>
+<div id="updated"></div>
+</header>
+<div class="controls" id="controls"></div>
+<div class="grid" id="grid"></div>
+<footer>
+Image cams refresh automatically &middot;
+Snowfall data from <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> &middot;
+Amounts in cm
+</footer>
+
+<script>
+const MOUNTAINS = [
+  // Vermont - Images
+  {name:"Stowe - Snow Stake",state:"VT",lat:44.5303,lon:-72.7814,
+   url:"https://common.snow.com/Mtncams/StoweSnowStake.jpg",type:"image",provider:"Epic",
+   webcamPage:"https://www.stowe.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
+  {name:"Killington - North Ridge",state:"VT",lat:43.6045,lon:-72.8201,
+   url:"https://manage.hdrelay.com/snapshot/61e3ce02-faaa-4499-a547-6574ef6fa4f6?size=1082x614&f=60000",type:"image",provider:"HDRelay",
+   webcamPage:"https://www.killington.com/the-mountain/conditions-weather/webcam/"},
+  {name:"Jay Peak - Tramside",state:"VT",lat:44.9368,lon:-72.5285,
+   url:"https://imgproxy.windy.com/_/preview/plain/current/1793868258/original.jpg",type:"image",provider:"Windy",
+   webcamPage:"https://www.jaypeakresort.com/conditions-cams/webcams"},
+  // Vermont - YouTube
+  {name:"Sugarbush - Gate House",state:"VT",lat:44.1363,lon:-72.9004,
+   url:"https://www.youtube.com/embed/tdQOYaEQC3o?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.sugarbush.com/mountain/webcams/"},
+  {name:"Smugglers' Notch - Base Lodge",state:"VT",lat:44.5878,lon:-72.7871,
+   url:"https://www.youtube.com/embed/iHcioLq9FKs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.smuggs.com/conditions-stats/web-cams/"},
+  {name:"Mad River Glen - Single Chair",state:"VT",lat:44.2014,lon:-72.9167,
+   url:"https://www.youtube.com/embed/wVOqgmbvCrY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.madriverglen.com/live-web-cam/"},
+  {name:"Okemo - Sugar House",state:"VT",lat:43.4013,lon:-72.7168,
+   url:"https://live9.brownrice.com/cam-images/okemosugarhouse.jpg",type:"image",provider:"Brownrice",
+   webcamPage:"https://www.okemo.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
+  {name:"Stratton - Base Cam",state:"VT",lat:43.1134,lon:-72.9079,
+   url:"https://www.youtube.com/embed/H-_sGi4Sbtk?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.stratton.com/the-mountain/webcams"},
+  {name:"Mount Snow",state:"VT",lat:42.9602,lon:-72.9209,
+   url:null,type:"link",provider:null,
+   webcamPage:"https://www.mountsnow.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
+  // Maine
+  {name:"Sunday River - Peak Lodge",state:"ME",lat:44.4735,lon:-70.8567,
+   url:"https://www.youtube.com/embed/J98tW5YX4Z8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.sundayriver.com/mountain-conditions/webcams"},
+  {name:"Sugarloaf - The Beach",state:"ME",lat:45.0314,lon:-70.3131,
+   url:"https://www.youtube.com/embed/j8VVBhJdyqY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.sugarloaf.com/conditions-weather/webcams"},
+  // New Hampshire
+  {name:"Cannon Mountain",state:"NH",lat:44.1566,lon:-71.6984,
+   url:"https://www.youtube.com/embed/NNF7tXuJUSs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.cannonmt.com/webcam"},
+  {name:"Loon Mountain - Octagon Base",state:"NH",lat:44.0369,lon:-71.6215,
+   url:"https://www.youtube.com/embed/5NUYOuzzZwc?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://www.loonmtn.com/mountain/webcams"},
+  {name:"Bretton Woods",state:"NH",lat:44.2546,lon:-71.4628,
+   url:null,type:"link",provider:null,
+   webcamPage:"https://www.brettonwoods.com/live-cam-forecast/"},
+  {name:"Wildcat / Mt Washington",state:"NH",lat:44.2637,lon:-71.2394,
+   url:"https://www.youtube.com/embed/RUN2G9r136c?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
+   webcamPage:"https://mountwashington.org/weather-cams/"},
+  {name:"Waterville Valley",state:"NH",lat:43.9502,lon:-71.5281,
+   url:null,type:"link",provider:null,
+   webcamPage:"https://www.waterville.com/cams"},
+  // New York
+  {name:"Whiteface - Lake Placid",state:"NY",lat:44.3658,lon:-73.9026,
+   url:"https://imgproxy.windy.com/_/preview/plain/current/1748724797/original.jpg",type:"image",provider:"Windy",
+   webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
+  {name:"Whiteface - Legacy Lodge",state:"NY",lat:44.3658,lon:-73.9026,
+   url:"https://manage.hdrelay.com/snapshot/56ce853a-23fc-48cc-af9b-13907ef75b9a?size=1082x614&f=60000",type:"image",provider:"HDRelay",
+   webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
+  {name:"Gore Mountain",state:"NY",lat:43.6690,lon:-74.0063,
+   url:null,type:"link",provider:null,
+   webcamPage:"https://goremountain.com/conditions/webcams/"},
+  {name:"Hunter Mountain - Base",state:"NY",lat:42.1776,lon:-74.2274,
+   url:"https://live8p.brownrice.com/cam-images/hunter1.jpg",type:"image",provider:"Brownrice",
+   webcamPage:"https://www.huntermtn.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
+  {name:"Windham Mountain",state:"NY",lat:42.2969,lon:-74.2583,
+   url:null,type:"link",provider:null,
+   webcamPage:"https://www.windhammountain.com/conditions/webcams"},
+];
+
+const STATES = [...new Set(MOUNTAINS.map(m => m.state))];
+let activeFilter = "ALL";
+let refreshMs = 300000;
+let refreshIntervalId = null;
+
+// --- Controls ---
+function buildControls() {
+  const c = document.getElementById("controls");
+  ["ALL", ...STATES].forEach(s => {
+    const b = document.createElement("button");
+    b.className = "filter-btn" + (s === "ALL" ? " active" : "");
+    b.textContent = s;
+    b.dataset.filter = s;
+    if (s !== "ALL") b.classList.add(s);
+    b.onclick = () => {
+      activeFilter = s;
+      document.querySelectorAll(".filter-btn").forEach(x => x.classList.toggle("active", x.dataset.filter === s));
+      document.querySelectorAll(".card").forEach(card => {
+        card.style.display = (s === "ALL" || card.dataset.state === s) ? "" : "none";
+      });
+    };
+    c.appendChild(b);
+  });
+}
+
+// --- Cache-bust for image refresh ---
+function bustUrl(url) {
+  const sep = url.includes("?") ? "&" : "?";
+  return url + sep + "_=" + Date.now();
+}
+
+function formatTime(ms) {
+  return new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+// --- Build Cards ---
+function buildGrid() {
+  const grid = document.getElementById("grid");
+  MOUNTAINS.forEach((m, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.state = m.state;
+    card.dataset.index = i;
+
+    // Header
+    const head = document.createElement("div");
+    head.className = "card-head";
+    const providerHtml = m.provider ? `<span class="provider">${m.provider}</span>` : "";
+    head.innerHTML = `<h3>${esc(m.name)}</h3><div class="meta"><span class="badge ${m.state}">${m.state}</span>${providerHtml}</div>`;
+
+    // Feed area
+    const feed = document.createElement("div");
+    feed.className = "cam-feed";
+
+    if (m.type === "iframe") {
+      const iframe = document.createElement("iframe");
+      iframe.src = m.url;
+      iframe.title = m.name;
+      iframe.loading = "lazy";
+      iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+      iframe.allowFullscreen = true;
+      feed.appendChild(iframe);
+    } else if (m.type === "image" && m.url) {
+      const img = document.createElement("img");
+      img.alt = m.name;
+      img.loading = "lazy";
+      img.src = bustUrl(m.url);
+      img.dataset.originalUrl = m.url;
+      img.onerror = function() {
+        const ph = document.createElement("div");
+        ph.className = "placeholder error";
+        ph.innerHTML = `Webcam unavailable<a href="${esc(m.webcamPage)}" target="_blank" rel="noopener">View on resort site</a>`;
+        feed.appendChild(ph);
+        img.remove();
+      };
+      img.onload = function() {
+        const upd = card.querySelector(".cam-updated");
+        if (upd) upd.textContent = "Updated " + formatTime(Date.now());
+      };
+      feed.appendChild(img);
+    } else {
+      // Link-only fallback
+      const ph = document.createElement("div");
+      ph.className = "placeholder";
+      ph.innerHTML = `<span>No direct feed available</span><a href="${esc(m.webcamPage)}" target="_blank" rel="noopener">Open resort webcam page</a>`;
+      feed.appendChild(ph);
+    }
+
+    // Updated timestamp (for image feeds)
+    let updatedDiv = null;
+    if (m.type === "image" && m.url) {
+      updatedDiv = document.createElement("div");
+      updatedDiv.className = "cam-updated";
+      updatedDiv.textContent = "Loading...";
+    }
+
+    // Forecast placeholder
+    const forecastDiv = document.createElement("div");
+    forecastDiv.className = "loading-strip";
+    forecastDiv.id = "forecast-" + i;
+    forecastDiv.innerHTML = '<div class="spinner"></div>Loading forecast...';
+
+    card.appendChild(head);
+    card.appendChild(feed);
+    if (updatedDiv) card.appendChild(updatedDiv);
+    card.appendChild(forecastDiv);
+    grid.appendChild(card);
+  });
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// --- Image Refresh ---
+function refreshAllImages() {
+  document.querySelectorAll(".cam-feed img").forEach(img => {
+    if (img.dataset.originalUrl) {
+      img.src = bustUrl(img.dataset.originalUrl);
+    }
+  });
+}
+
+function startRefreshInterval() {
+  if (refreshIntervalId) clearInterval(refreshIntervalId);
+  refreshIntervalId = setInterval(refreshAllImages, refreshMs);
+}
+
+document.getElementById("refreshInterval").addEventListener("change", function() {
+  refreshMs = parseInt(this.value, 10);
+  startRefreshInterval();
+});
+
+document.getElementById("refreshNow").addEventListener("click", refreshAllImages);
+
+// --- Forecast ---
+async function fetchForecast(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=snowfall_sum&past_days=3&forecast_days=3&timezone=America%2FNew_York`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error("HTTP " + resp.status);
+  const data = await resp.json();
+  return { dates: data.daily.time, snowfall: data.daily.snowfall_sum };
+}
+
+function snowClass(cm) {
+  if (!cm) return "s-zero";
+  if (cm < 1) return "s-trace";
+  if (cm < 3) return "s-light";
+  if (cm < 8) return "s-mod";
+  return "s-heavy";
+}
+
+function snowIcon(cm) {
+  if (!cm) return "-";
+  if (cm < 1) return "*";
+  if (cm < 5) return "**";
+  return "***";
+}
+
+function renderForecast(index, data) {
+  const el = document.getElementById("forecast-" + index);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayIdx = data.dates.indexOf(today);
+  let html = "";
+  data.dates.forEach((date, i) => {
+    const cm = data.snowfall[i];
+    const isToday = date === today;
+    const isPast = i < todayIdx;
+    const d = new Date(date + "T12:00:00");
+    const dayStr = d.toLocaleDateString("en-US", { weekday: "short" });
+    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const cls = snowClass(cm);
+    const tagCls = isToday ? "tag-today" : isPast ? "tag-past" : "tag-fcast";
+    const tagLabel = isToday ? "Today" : isPast ? "Past" : "Forecast";
+    html += `<div class="fday ${cls} ${isToday ? "today" : ""}">
+      <div class="dt">${dayStr}<br>${dateStr}</div>
+      <div class="snow-icon">${snowIcon(cm)}</div>
+      <div class="amt">${cm != null ? cm.toFixed(1) : "0.0"} cm</div>
+      <div class="tag ${tagCls}">${tagLabel}</div>
+    </div>`;
+  });
+  el.className = "forecast-strip";
+  el.innerHTML = html;
+}
+
+function renderError(index, msg) {
+  const el = document.getElementById("forecast-" + index);
+  el.className = "error-strip";
+  el.textContent = "Forecast unavailable: " + msg;
+}
+
+async function loadAllForecasts() {
+  // Deduplicate by lat/lon to avoid redundant API calls (e.g. two Whiteface cams)
+  const seen = new Map();
+  for (let i = 0; i < MOUNTAINS.length; i++) {
+    const m = MOUNTAINS[i];
+    const key = m.lat + "," + m.lon;
+    try {
+      let data;
+      if (seen.has(key)) {
+        data = seen.get(key);
+      } else {
+        data = await fetchForecast(m.lat, m.lon);
+        seen.set(key, data);
+        if (i < MOUNTAINS.length - 1) await new Promise(r => setTimeout(r, 100));
+      }
+      renderForecast(i, data);
+    } catch (e) {
+      renderError(i, e.message);
+    }
+  }
+  document.getElementById("updated").textContent =
+    "Forecasts loaded: " + new Date().toLocaleString("en-US", { timeZone: "America/New_York" }) + " ET";
+}
+
+// --- Init ---
+buildControls();
+buildGrid();
+loadAllForecasts();
+startRefreshInterval();
+</script>
+</body>
+</html>
