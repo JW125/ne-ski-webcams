@@ -114,95 +114,95 @@ NWS-style precip colors: <span style="color:#91bfff">Snow</span> / <span style="
 
 <script>
 // Base and summit elevations in meters for current temp lookups
-// pass: "epic" | "ikon" | "indy" | null
+// pass: array of pass affiliations e.g. ["ikon","mc"] or []
 const MOUNTAINS = [
   // -- Connecticut --
-  {name:"Mount Southington",state:"CT",lat:41.5900,lon:-72.8800,baseElev:99,summitElev:221,pass:"indy",
+  {name:"Mount Southington",state:"CT",lat:41.5900,lon:-72.8800,baseElev:99,summitElev:221,pass:["indy"],
    url:"https://www.youtube.com/embed/TrZ3E6VB1E8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://mountsouthington.com/conditions/"},
-  {name:"Ski Sundown",state:"CT",lat:41.9200,lon:-72.9700,baseElev:168,summitElev:328,pass:"indy",
+  {name:"Ski Sundown",state:"CT",lat:41.9200,lon:-72.9700,baseElev:168,summitElev:328,pass:["indy"],
    url:"https://www.youtube.com/embed/2zVEuh_7rKk?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.skisundown.com/conditions/"},
   // -- New York --
-  {name:"Hunter Mountain - Base",state:"NY",lat:42.1776,lon:-74.2274,baseElev:488,summitElev:975,pass:"epic",
+  {name:"Hunter Mountain - Base",state:"NY",lat:42.1776,lon:-74.2274,baseElev:488,summitElev:975,pass:["epic"],
    url:"https://live8p.brownrice.com/cam-images/hunter1.jpg",type:"image",provider:"Brownrice",
    webcamPage:"https://www.huntermtn.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Greek Peak - Base Cam",state:"NY",lat:42.5100,lon:-76.1500,baseElev:335,summitElev:640,pass:"indy",
+  {name:"Greek Peak - Base Cam",state:"NY",lat:42.5100,lon:-76.1500,baseElev:335,summitElev:640,pass:["indy"],
    url:"https://www.youtube.com/embed/JWugDNXhOoA?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.greekpeak.net/conditions-weather/webcams"},
-  {name:"Gore Mountain",state:"NY",lat:43.6690,lon:-74.0063,baseElev:465,summitElev:1097,pass:"ikon",
+  {name:"Gore Mountain",state:"NY",lat:43.6690,lon:-74.0063,baseElev:465,summitElev:1097,pass:["ikon"],
    url:"https://imgproxy.windy.com/_/preview/plain/current/1161387262/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://goremountain.com/conditions/webcams/"},
-  {name:"Whiteface - Lake Placid",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:"ikon",
+  {name:"Whiteface - Lake Placid",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:["ikon","mc"],
    url:"https://imgproxy.windy.com/_/preview/plain/current/1748724797/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
-  {name:"Whiteface - Legacy Lodge",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:"ikon",
+  {name:"Whiteface - Legacy Lodge",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:["ikon","mc"],
    url:"https://manage.hdrelay.com/snapshot/56ce853a-23fc-48cc-af9b-13907ef75b9a?size=1082x614&f=60000",type:"image",provider:"HDRelay",
    webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
   // -- Vermont --
-  {name:"Stratton - Base Cam",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:"ikon",
+  {name:"Stratton - Base Cam",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:["ikon"],
    url:"https://www.youtube.com/embed/H-_sGi4Sbtk?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.stratton.com/the-mountain/webcams"},
-  {name:"Stratton - Mid Mountain",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:"ikon",
+  {name:"Stratton - Mid Mountain",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:["ikon"],
    url:"https://www.youtube.com/embed/AhcH03HwuH0?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.stratton.com/the-mountain/webcams"},
-  {name:"Magic Mountain",state:"VT",lat:43.2092,lon:-72.7656,baseElev:350,summitElev:869,pass:"indy",
+  {name:"Magic Mountain",state:"VT",lat:43.2092,lon:-72.7656,baseElev:350,summitElev:869,pass:["indy"],
    url:"https://www.youtube.com/embed/L7-VcbcMXS8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.magicmtn.com/conditions"},
-  {name:"Okemo - Sugar House",state:"VT",lat:43.4013,lon:-72.7168,baseElev:349,summitElev:1019,pass:"epic",
+  {name:"Okemo - Sugar House",state:"VT",lat:43.4013,lon:-72.7168,baseElev:349,summitElev:1019,pass:["epic"],
    url:"https://live9.brownrice.com/cam-images/okemosugarhouse.jpg",type:"image",provider:"Brownrice",
    webcamPage:"https://www.okemo.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Killington - North Ridge",state:"VT",lat:43.6045,lon:-72.8201,baseElev:355,summitElev:1293,pass:"ikon",
+  {name:"Killington - North Ridge",state:"VT",lat:43.6045,lon:-72.8201,baseElev:355,summitElev:1293,pass:["ikon"],
    url:"https://manage.hdrelay.com/snapshot/61e3ce02-faaa-4499-a547-6574ef6fa4f6?size=1082x614&f=60000",type:"image",provider:"HDRelay",
    webcamPage:"https://www.killington.com/the-mountain/conditions-weather/webcam/"},
-  {name:"Sugarbush - Gate House",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:"ikon",
+  {name:"Sugarbush - Gate House",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:["ikon"],
    url:"https://www.youtube.com/embed/tdQOYaEQC3o?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarbush.com/mountain/webcams/"},
-  {name:"Sugarbush - Super Bravo",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:"ikon",
+  {name:"Sugarbush - Super Bravo",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:["ikon"],
    url:"https://www.youtube.com/embed/n5QqJSYEZT8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarbush.com/mountain/webcams/"},
-  {name:"Mad River Glen - Single Chair",state:"VT",lat:44.2014,lon:-72.9167,baseElev:488,summitElev:1109,pass:"indy",
+  {name:"Mad River Glen - Single Chair",state:"VT",lat:44.2014,lon:-72.9167,baseElev:488,summitElev:1109,pass:["indy"],
    url:"https://www.youtube.com/embed/wVOqgmbvCrY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.madriverglen.com/live-web-cam/"},
-  {name:"Bolton Valley - Base Area",state:"VT",lat:44.4167,lon:-72.8500,baseElev:640,summitElev:960,pass:"indy",
+  {name:"Bolton Valley - Base Area",state:"VT",lat:44.4167,lon:-72.8500,baseElev:640,summitElev:960,pass:["indy"],
    url:"https://www.youtube.com/embed/VX9ANOUYO1k?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://boltonvalley.com/the-resort/web-cams/"},
-  {name:"Stowe - Snow Stake",state:"VT",lat:44.5303,lon:-72.7814,baseElev:390,summitElev:1105,pass:"epic",
+  {name:"Stowe - Snow Stake",state:"VT",lat:44.5303,lon:-72.7814,baseElev:390,summitElev:1105,pass:["epic"],
    url:"https://common.snow.com/Mtncams/StoweSnowStake.jpg",type:"image",provider:"Epic",
    webcamPage:"https://www.stowe.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Smugglers' Notch - Base Lodge",state:"VT",lat:44.5878,lon:-72.7871,baseElev:314,summitElev:1110,pass:"indy",
+  {name:"Smugglers' Notch - Base Lodge",state:"VT",lat:44.5878,lon:-72.7871,baseElev:314,summitElev:1110,pass:["indy"],
    url:"https://www.youtube.com/embed/iHcioLq9FKs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.smuggs.com/conditions-stats/web-cams/"},
-  {name:"Jay Peak - Tramside",state:"VT",lat:44.9368,lon:-72.5285,baseElev:553,summitElev:1209,pass:"indy",
+  {name:"Jay Peak - Tramside",state:"VT",lat:44.9368,lon:-72.5285,baseElev:553,summitElev:1209,pass:["indy"],
    url:"https://imgproxy.windy.com/_/preview/plain/current/1793868258/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://www.jaypeakresort.com/conditions-cams/webcams"},
   // -- New Hampshire --
-  {name:"Pat's Peak",state:"NH",lat:43.1700,lon:-71.8700,baseElev:229,summitElev:427,pass:"indy",
+  {name:"Pat's Peak",state:"NH",lat:43.1700,lon:-71.8700,baseElev:229,summitElev:427,pass:["indy"],
    url:"https://www.youtube.com/embed/KFjl8wPJvyg?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.patspeak.com/mountain-info/webcam"},
-  {name:"Ragged Mountain",state:"NH",lat:43.4833,lon:-71.8500,baseElev:274,summitElev:686,pass:"indy",
+  {name:"Ragged Mountain",state:"NH",lat:43.4833,lon:-71.8500,baseElev:274,summitElev:686,pass:["indy"],
    url:"https://api.wetmet.net/widgets/stream/frame.php?uid=1e039d71ff08195e4052b01859843890",type:"iframe",provider:"WetMet",
    webcamPage:"https://www.raggedmountainresort.com/conditions/"},
-  {name:"Loon Mountain - Octagon Base",state:"NH",lat:44.0369,lon:-71.6215,baseElev:290,summitElev:930,pass:"ikon",
+  {name:"Loon Mountain - Octagon Base",state:"NH",lat:44.0369,lon:-71.6215,baseElev:290,summitElev:930,pass:["ikon"],
    url:"https://www.youtube.com/embed/5NUYOuzzZwc?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.loonmtn.com/mountain/webcams"},
-  {name:"Cranmore - Meister Cam",state:"NH",lat:44.0564,lon:-71.1081,baseElev:183,summitElev:610,pass:"indy",
+  {name:"Cranmore - Meister Cam",state:"NH",lat:44.0564,lon:-71.1081,baseElev:183,summitElev:610,pass:["indy"],
    url:"https://www.youtube.com/embed/AwUDongE3KU?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.cranmore.com/the-mountain/conditions-weather/webcam"},
-  {name:"Attitash",state:"NH",lat:44.0833,lon:-71.2300,baseElev:183,summitElev:716,pass:"epic",
+  {name:"Attitash",state:"NH",lat:44.0833,lon:-71.2300,baseElev:183,summitElev:716,pass:["epic"],
    url:"https://www.youtube.com/embed/dk8UdsE-BNQ?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.attitash.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Cannon Mountain",state:"NH",lat:44.1566,lon:-71.6984,baseElev:579,summitElev:1244,pass:null,
+  {name:"Cannon Mountain",state:"NH",lat:44.1566,lon:-71.6984,baseElev:579,summitElev:1244,pass:[],
    url:"https://www.youtube.com/embed/NNF7tXuJUSs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.cannonmt.com/webcam"},
-  {name:"Wildcat / Mt Washington",state:"NH",lat:44.2637,lon:-71.2394,baseElev:579,summitElev:1238,pass:"epic",
+  {name:"Wildcat / Mt Washington",state:"NH",lat:44.2637,lon:-71.2394,baseElev:579,summitElev:1238,pass:["epic"],
    url:"https://www.youtube.com/embed/RUN2G9r136c?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://mountwashington.org/weather-cams/"},
   // -- Maine --
-  {name:"Sunday River - Peak Lodge",state:"ME",lat:44.4735,lon:-70.8567,baseElev:244,summitElev:957,pass:"ikon",
+  {name:"Sunday River - Peak Lodge",state:"ME",lat:44.4735,lon:-70.8567,baseElev:244,summitElev:957,pass:["ikon","mc"],
    url:"https://www.youtube.com/embed/J98tW5YX4Z8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sundayriver.com/mountain-conditions/webcams"},
-  {name:"Sugarloaf - The Beach",state:"ME",lat:45.0314,lon:-70.3131,baseElev:427,summitElev:1291,pass:"ikon",
+  {name:"Sugarloaf - The Beach",state:"ME",lat:45.0314,lon:-70.3131,baseElev:427,summitElev:1291,pass:["ikon","mc"],
    url:"https://www.youtube.com/embed/j8VVBhJdyqY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarloaf.com/conditions-weather/webcams"},
 ];
@@ -269,7 +269,7 @@ function buildControls() {
 function applyFilters() {
   document.querySelectorAll(".card").forEach(card => {
     const stateOk = activeStateFilter === "ALL" || card.dataset.state === activeStateFilter;
-    const passOk = !activePassFilter || card.dataset.pass === activePassFilter;
+    const passOk = !activePassFilter || card.dataset.pass.split(" ").includes(activePassFilter);
     card.style.display = (stateOk && passOk) ? "" : "none";
   });
 }
@@ -295,13 +295,13 @@ function buildGrid() {
     card.className = "card";
     card.dataset.state = m.state;
     card.dataset.index = i;
-    card.dataset.pass = m.pass || "";
+    card.dataset.pass = (m.pass || []).join(" ");
 
     // Header
     const head = document.createElement("div");
     head.className = "card-head";
     const providerHtml = m.provider ? `<span class="provider">${m.provider}</span>` : "";
-    const passHtml = m.pass ? `<span class="pass-badge ${m.pass}">${PASS_LABELS[m.pass]}</span>` : "";
+    const passHtml = (m.pass || []).map(p => `<span class="pass-badge ${p}">${PASS_LABELS[p]}</span>`).join("");
     const distHtml = `<span class="dist-tag" id="dist-${i}"></span>`;
     head.innerHTML = `<h3>${esc(m.name)}</h3><div class="meta">${distHtml}${passHtml}<span class="badge ${m.state}">${m.state}</span>${providerHtml}</div>`;
 
