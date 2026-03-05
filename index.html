@@ -18,18 +18,30 @@ header p{color:#8b949e;margin-top:6px;font-size:0.85rem}
 .btn-refresh{font:inherit;padding:5px 14px;background:rgba(88,166,255,.12);border:1px solid #58a6ff;border-radius:8px;color:#58a6ff;cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s}
 .btn-refresh:hover{background:#58a6ff;color:#0d1117}
 #updated{color:#484f58;font-size:0.72rem;margin-top:6px}
-.controls{text-align:center;padding:10px 20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50;background:#0d1117;border-bottom:1px solid #21262d;backdrop-filter:blur(8px);background:rgba(13,17,23,.92)}
-.filter-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:5px 14px;border-radius:20px;cursor:pointer;font-size:0.78rem;transition:all .2s}
+.controls{text-align:center;padding:8px 12px;display:flex;justify-content:center;gap:5px;flex-wrap:wrap;position:sticky;top:0;z-index:50;background:#0d1117;border-bottom:1px solid #21262d;backdrop-filter:blur(8px);background:rgba(13,17,23,.92);align-items:center}
+.filter-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:3px 9px;border-radius:16px;cursor:pointer;font-size:0.7rem;transition:all .2s;white-space:nowrap}
 .filter-btn:hover,.filter-btn.active{background:#30363d;color:#e6edf3;border-color:#58a6ff}
+.pill-sep{width:1px;height:18px;background:#30363d;margin:0 3px;flex-shrink:0}
+/* Pass pill colors */
+.filter-btn.pass-epic{border-color:#c9372c}.filter-btn.pass-epic.active,.filter-btn.pass-epic:hover{background:rgba(201,55,44,.25);border-color:#ef5350;color:#ef5350}
+.filter-btn.pass-ikon{border-color:#e68a00}.filter-btn.pass-ikon.active,.filter-btn.pass-ikon:hover{background:rgba(230,138,0,.2);border-color:#ffa726;color:#ffa726}
+.filter-btn.pass-indy{border-color:#1a9988}.filter-btn.pass-indy.active,.filter-btn.pass-indy:hover{background:rgba(26,153,136,.2);border-color:#26c6da;color:#26c6da}
+.filter-btn.pass-mc{border-color:#388e3c}.filter-btn.pass-mc.active,.filter-btn.pass-mc:hover{background:rgba(56,142,60,.2);border-color:#66bb6a;color:#66bb6a}
+/* Pass badge in card header */
+.pass-badge{font-size:.55rem;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.pass-badge.epic{background:#c9372c;color:#fff}
+.pass-badge.ikon{background:#e68a00;color:#fff}
+.pass-badge.indy{background:#1a9988;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px;padding:20px;max-width:1800px;margin:0 auto}
 @media(max-width:480px){.grid{grid-template-columns:1fr;padding:12px}}
 .card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s}
 .card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .card-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#1c2128;border-bottom:1px solid #30363d}
 .card-head h3{font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-head .meta{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px}
+.card-head .meta{display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:8px}
 .badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:700}
 .provider{font-size:.62rem;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.06);color:#8b949e;font-family:monospace}
+.dist-tag{font-size:.58rem;color:#8b949e;font-family:monospace}
 .VT{background:#238636;color:#fff}.NH{background:#1f6feb;color:#fff}.ME{background:#da3633;color:#fff}.NY{background:#8957e5;color:#fff}.CT{background:#f78166;color:#000}
 /* Webcam feed */
 .cam-feed{position:relative;aspect-ratio:16/10;background:#0d1117;overflow:hidden}
@@ -98,123 +110,163 @@ NWS-style precip colors: <span style="color:#91bfff">Snow</span> / <span style="
 
 <script>
 // Base and summit elevations in meters for current temp lookups
-// Ordered by distance from NYC (closest first within each state group)
+// pass: "epic" | "ikon" | "indy" | null
 const MOUNTAINS = [
-  // ── Connecticut (closest to NYC) ────────────────────────
-  {name:"Mount Southington",state:"CT",lat:41.5900,lon:-72.8800,baseElev:99,summitElev:221,
+  // -- Connecticut --
+  {name:"Mount Southington",state:"CT",lat:41.5900,lon:-72.8800,baseElev:99,summitElev:221,pass:"indy",
    url:"https://www.youtube.com/embed/TrZ3E6VB1E8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://mountsouthington.com/conditions/"},
-  {name:"Ski Sundown",state:"CT",lat:41.9200,lon:-72.9700,baseElev:168,summitElev:328,
+  {name:"Ski Sundown",state:"CT",lat:41.9200,lon:-72.9700,baseElev:168,summitElev:328,pass:"indy",
    url:"https://www.youtube.com/embed/2zVEuh_7rKk?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.skisundown.com/conditions/"},
-  // ── New York ────────────────────────────────────────────
-  {name:"Hunter Mountain - Base",state:"NY",lat:42.1776,lon:-74.2274,baseElev:488,summitElev:975,
+  // -- New York --
+  {name:"Hunter Mountain - Base",state:"NY",lat:42.1776,lon:-74.2274,baseElev:488,summitElev:975,pass:"epic",
    url:"https://live8p.brownrice.com/cam-images/hunter1.jpg",type:"image",provider:"Brownrice",
    webcamPage:"https://www.huntermtn.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Greek Peak - Base Cam",state:"NY",lat:42.5100,lon:-76.1500,baseElev:335,summitElev:640,
+  {name:"Greek Peak - Base Cam",state:"NY",lat:42.5100,lon:-76.1500,baseElev:335,summitElev:640,pass:"indy",
    url:"https://www.youtube.com/embed/JWugDNXhOoA?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.greekpeak.net/conditions-weather/webcams"},
-  {name:"Gore Mountain",state:"NY",lat:43.6690,lon:-74.0063,baseElev:465,summitElev:1097,
+  {name:"Gore Mountain",state:"NY",lat:43.6690,lon:-74.0063,baseElev:465,summitElev:1097,pass:"ikon",
    url:"https://imgproxy.windy.com/_/preview/plain/current/1161387262/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://goremountain.com/conditions/webcams/"},
-  {name:"Whiteface - Lake Placid",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,
+  {name:"Whiteface - Lake Placid",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:"ikon",
    url:"https://imgproxy.windy.com/_/preview/plain/current/1748724797/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
-  {name:"Whiteface - Legacy Lodge",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,
+  {name:"Whiteface - Legacy Lodge",state:"NY",lat:44.3658,lon:-73.9026,baseElev:372,summitElev:1483,pass:"ikon",
    url:"https://manage.hdrelay.com/snapshot/56ce853a-23fc-48cc-af9b-13907ef75b9a?size=1082x614&f=60000",type:"image",provider:"HDRelay",
    webcamPage:"https://www.whiteface.com/mountain-info/webcams"},
-  // ── Vermont ─────────────────────────────────────────────
-  {name:"Stratton - Base Cam",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,
+  // -- Vermont --
+  {name:"Stratton - Base Cam",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:"ikon",
    url:"https://www.youtube.com/embed/H-_sGi4Sbtk?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.stratton.com/the-mountain/webcams"},
-  {name:"Stratton - Mid Mountain",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,
+  {name:"Stratton - Mid Mountain",state:"VT",lat:43.1134,lon:-72.9079,baseElev:571,summitElev:1181,pass:"ikon",
    url:"https://www.youtube.com/embed/AhcH03HwuH0?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.stratton.com/the-mountain/webcams"},
-  {name:"Magic Mountain",state:"VT",lat:43.2092,lon:-72.7656,baseElev:350,summitElev:869,
+  {name:"Magic Mountain",state:"VT",lat:43.2092,lon:-72.7656,baseElev:350,summitElev:869,pass:"indy",
    url:"https://www.youtube.com/embed/L7-VcbcMXS8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.magicmtn.com/conditions"},
-  {name:"Okemo - Sugar House",state:"VT",lat:43.4013,lon:-72.7168,baseElev:349,summitElev:1019,
+  {name:"Okemo - Sugar House",state:"VT",lat:43.4013,lon:-72.7168,baseElev:349,summitElev:1019,pass:"epic",
    url:"https://live9.brownrice.com/cam-images/okemosugarhouse.jpg",type:"image",provider:"Brownrice",
    webcamPage:"https://www.okemo.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Killington - North Ridge",state:"VT",lat:43.6045,lon:-72.8201,baseElev:355,summitElev:1293,
+  {name:"Killington - North Ridge",state:"VT",lat:43.6045,lon:-72.8201,baseElev:355,summitElev:1293,pass:"ikon",
    url:"https://manage.hdrelay.com/snapshot/61e3ce02-faaa-4499-a547-6574ef6fa4f6?size=1082x614&f=60000",type:"image",provider:"HDRelay",
    webcamPage:"https://www.killington.com/the-mountain/conditions-weather/webcam/"},
-  {name:"Sugarbush - Gate House",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,
+  {name:"Sugarbush - Gate House",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:"ikon",
    url:"https://www.youtube.com/embed/tdQOYaEQC3o?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarbush.com/mountain/webcams/"},
-  {name:"Sugarbush - Super Bravo",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,
+  {name:"Sugarbush - Super Bravo",state:"VT",lat:44.1363,lon:-72.9004,baseElev:451,summitElev:1244,pass:"ikon",
    url:"https://www.youtube.com/embed/n5QqJSYEZT8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarbush.com/mountain/webcams/"},
-  {name:"Mad River Glen - Single Chair",state:"VT",lat:44.2014,lon:-72.9167,baseElev:488,summitElev:1109,
+  {name:"Mad River Glen - Single Chair",state:"VT",lat:44.2014,lon:-72.9167,baseElev:488,summitElev:1109,pass:"indy",
    url:"https://www.youtube.com/embed/wVOqgmbvCrY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.madriverglen.com/live-web-cam/"},
-  {name:"Bolton Valley - Base Area",state:"VT",lat:44.4167,lon:-72.8500,baseElev:640,summitElev:960,
+  {name:"Bolton Valley - Base Area",state:"VT",lat:44.4167,lon:-72.8500,baseElev:640,summitElev:960,pass:"indy",
    url:"https://www.youtube.com/embed/VX9ANOUYO1k?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://boltonvalley.com/the-resort/web-cams/"},
-  {name:"Stowe - Snow Stake",state:"VT",lat:44.5303,lon:-72.7814,baseElev:390,summitElev:1105,
+  {name:"Stowe - Snow Stake",state:"VT",lat:44.5303,lon:-72.7814,baseElev:390,summitElev:1105,pass:"epic",
    url:"https://common.snow.com/Mtncams/StoweSnowStake.jpg",type:"image",provider:"Epic",
    webcamPage:"https://www.stowe.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Smugglers' Notch - Base Lodge",state:"VT",lat:44.5878,lon:-72.7871,baseElev:314,summitElev:1110,
+  {name:"Smugglers' Notch - Base Lodge",state:"VT",lat:44.5878,lon:-72.7871,baseElev:314,summitElev:1110,pass:"indy",
    url:"https://www.youtube.com/embed/iHcioLq9FKs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.smuggs.com/conditions-stats/web-cams/"},
-  {name:"Jay Peak - Tramside",state:"VT",lat:44.9368,lon:-72.5285,baseElev:553,summitElev:1209,
+  {name:"Jay Peak - Tramside",state:"VT",lat:44.9368,lon:-72.5285,baseElev:553,summitElev:1209,pass:"indy",
    url:"https://imgproxy.windy.com/_/preview/plain/current/1793868258/original.jpg",type:"image",provider:"Windy",
    webcamPage:"https://www.jaypeakresort.com/conditions-cams/webcams"},
-  // ── New Hampshire ───────────────────────────────────────
-  {name:"Pat's Peak",state:"NH",lat:43.1700,lon:-71.8700,baseElev:229,summitElev:427,
+  // -- New Hampshire --
+  {name:"Pat's Peak",state:"NH",lat:43.1700,lon:-71.8700,baseElev:229,summitElev:427,pass:"indy",
    url:"https://www.youtube.com/embed/KFjl8wPJvyg?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.patspeak.com/mountain-info/webcam"},
-  {name:"Ragged Mountain",state:"NH",lat:43.4833,lon:-71.8500,baseElev:274,summitElev:686,
+  {name:"Ragged Mountain",state:"NH",lat:43.4833,lon:-71.8500,baseElev:274,summitElev:686,pass:"indy",
    url:"https://api.wetmet.net/widgets/stream/frame.php?uid=1e039d71ff08195e4052b01859843890",type:"iframe",provider:"WetMet",
    webcamPage:"https://www.raggedmountainresort.com/conditions/"},
-  {name:"Loon Mountain - Octagon Base",state:"NH",lat:44.0369,lon:-71.6215,baseElev:290,summitElev:930,
+  {name:"Loon Mountain - Octagon Base",state:"NH",lat:44.0369,lon:-71.6215,baseElev:290,summitElev:930,pass:"ikon",
    url:"https://www.youtube.com/embed/5NUYOuzzZwc?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.loonmtn.com/mountain/webcams"},
-  {name:"Cranmore - Meister Cam",state:"NH",lat:44.0564,lon:-71.1081,baseElev:183,summitElev:610,
+  {name:"Cranmore - Meister Cam",state:"NH",lat:44.0564,lon:-71.1081,baseElev:183,summitElev:610,pass:"indy",
    url:"https://www.youtube.com/embed/AwUDongE3KU?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.cranmore.com/the-mountain/conditions-weather/webcam"},
-  {name:"Attitash",state:"NH",lat:44.0833,lon:-71.2300,baseElev:183,summitElev:716,
+  {name:"Attitash",state:"NH",lat:44.0833,lon:-71.2300,baseElev:183,summitElev:716,pass:"epic",
    url:"https://www.youtube.com/embed/dk8UdsE-BNQ?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.attitash.com/the-mountain/mountain-conditions/mountain-cams.aspx"},
-  {name:"Cannon Mountain",state:"NH",lat:44.1566,lon:-71.6984,baseElev:579,summitElev:1244,
+  {name:"Cannon Mountain",state:"NH",lat:44.1566,lon:-71.6984,baseElev:579,summitElev:1244,pass:null,
    url:"https://www.youtube.com/embed/NNF7tXuJUSs?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.cannonmt.com/webcam"},
-  {name:"Wildcat / Mt Washington",state:"NH",lat:44.2637,lon:-71.2394,baseElev:579,summitElev:1238,
+  {name:"Wildcat / Mt Washington",state:"NH",lat:44.2637,lon:-71.2394,baseElev:579,summitElev:1238,pass:"epic",
    url:"https://www.youtube.com/embed/RUN2G9r136c?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://mountwashington.org/weather-cams/"},
-  // ── Maine (farthest from NYC) ───────────────────────────
-  {name:"Sunday River - Peak Lodge",state:"ME",lat:44.4735,lon:-70.8567,baseElev:244,summitElev:957,
+  // -- Maine --
+  {name:"Sunday River - Peak Lodge",state:"ME",lat:44.4735,lon:-70.8567,baseElev:244,summitElev:957,pass:"ikon",
    url:"https://www.youtube.com/embed/J98tW5YX4Z8?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sundayriver.com/mountain-conditions/webcams"},
-  {name:"Sugarloaf - The Beach",state:"ME",lat:45.0314,lon:-70.3131,baseElev:427,summitElev:1291,
+  {name:"Sugarloaf - The Beach",state:"ME",lat:45.0314,lon:-70.3131,baseElev:427,summitElev:1291,pass:"ikon",
    url:"https://www.youtube.com/embed/j8VVBhJdyqY?autoplay=1&mute=1&rel=0",type:"iframe",provider:"YouTube",
    webcamPage:"https://www.sugarloaf.com/conditions-weather/webcams"},
 ];
 
-// State order: closest to NYC first
 const STATE_ORDER = ["CT","NY","VT","NH","ME"];
 const STATES = STATE_ORDER.filter(s => MOUNTAINS.some(m => m.state === s));
-let activeFilter = "ALL";
+const PASS_TYPES = ["epic","ikon","indy"];
+const PASS_LABELS = {epic:"Epic",ikon:"Ikon",indy:"Indy"};
+const PASS_ICONS = {epic:"\u26F7",ikon:"\u2B50",indy:"\uD83C\uDFBF"};
+
+let activeStateFilter = "ALL";
+let activePassFilter = null;
 let refreshMs = 300000;
 let refreshIntervalId = null;
+let drivingDistances = {}; // index -> miles
 
 // --- Controls ---
 function buildControls() {
   const c = document.getElementById("controls");
+
+  // State pills
   ["ALL", ...STATES].forEach(s => {
     const b = document.createElement("button");
     b.className = "filter-btn" + (s === "ALL" ? " active" : "");
     b.textContent = s;
     b.dataset.filter = s;
+    b.dataset.group = "state";
     if (s !== "ALL") b.classList.add(s);
     b.onclick = () => {
-      activeFilter = s;
-      document.querySelectorAll(".filter-btn").forEach(x => x.classList.toggle("active", x.dataset.filter === s));
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.display = (s === "ALL" || card.dataset.state === s) ? "" : "none";
-      });
+      activeStateFilter = s;
+      document.querySelectorAll('.filter-btn[data-group="state"]').forEach(x => x.classList.toggle("active", x.dataset.filter === s));
+      applyFilters();
     };
     c.appendChild(b);
+  });
+
+  // Separator
+  const sep = document.createElement("div");
+  sep.className = "pill-sep";
+  c.appendChild(sep);
+
+  // Pass pills
+  PASS_TYPES.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "filter-btn pass-" + p;
+    b.textContent = PASS_ICONS[p] + " " + PASS_LABELS[p];
+    b.dataset.filter = p;
+    b.dataset.group = "pass";
+    b.onclick = () => {
+      if (activePassFilter === p) {
+        activePassFilter = null;
+        b.classList.remove("active");
+      } else {
+        activePassFilter = p;
+        document.querySelectorAll('.filter-btn[data-group="pass"]').forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+      }
+      applyFilters();
+    };
+    c.appendChild(b);
+  });
+}
+
+function applyFilters() {
+  document.querySelectorAll(".card").forEach(card => {
+    const stateOk = activeStateFilter === "ALL" || card.dataset.state === activeStateFilter;
+    const passOk = !activePassFilter || card.dataset.pass === activePassFilter;
+    card.style.display = (stateOk && passOk) ? "" : "none";
   });
 }
 
@@ -239,12 +291,15 @@ function buildGrid() {
     card.className = "card";
     card.dataset.state = m.state;
     card.dataset.index = i;
+    card.dataset.pass = m.pass || "";
 
     // Header
     const head = document.createElement("div");
     head.className = "card-head";
     const providerHtml = m.provider ? `<span class="provider">${m.provider}</span>` : "";
-    head.innerHTML = `<h3>${esc(m.name)}</h3><div class="meta"><span class="badge ${m.state}">${m.state}</span>${providerHtml}</div>`;
+    const passHtml = m.pass ? `<span class="pass-badge ${m.pass}">${PASS_LABELS[m.pass]}</span>` : "";
+    const distHtml = `<span class="dist-tag" id="dist-${i}"></span>`;
+    head.innerHTML = `<h3>${esc(m.name)}</h3><div class="meta">${distHtml}${passHtml}<span class="badge ${m.state}">${m.state}</span>${providerHtml}</div>`;
 
     // Feed area
     const feed = document.createElement("div");
@@ -328,8 +383,93 @@ document.getElementById("refreshInterval").addEventListener("change", function()
 });
 document.getElementById("refreshNow").addEventListener("click", refreshAllImages);
 
+// --- Driving Distance (background) ---
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const R = 3959;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function loadDrivingDistances() {
+  try {
+    // Get user's approximate location via IP
+    let userLat, userLon;
+    try {
+      const geo = await fetch("https://ipapi.co/json/");
+      const geoData = await geo.json();
+      userLat = geoData.latitude;
+      userLon = geoData.longitude;
+    } catch {
+      // Fallback: NYC
+      userLat = 40.7128;
+      userLon = -74.0060;
+    }
+
+    // Deduplicate coordinates for OSRM call
+    const uniqueCoords = [];
+    const coordMap = {};
+    MOUNTAINS.forEach((m, i) => {
+      const key = m.lat + "," + m.lon;
+      if (!(key in coordMap)) {
+        coordMap[key] = uniqueCoords.length;
+        uniqueCoords.push({lat: m.lat, lon: m.lon});
+      }
+    });
+
+    // Build OSRM table request: user location first, then all unique mountain coords
+    const coords = `${userLon},${userLat};` + uniqueCoords.map(c => `${c.lon},${c.lat}`).join(";");
+    const osrmUrl = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`;
+
+    const resp = await fetch(osrmUrl);
+    const data = await resp.json();
+
+    if (data.code === "Ok" && data.distances && data.distances[0]) {
+      const distRow = data.distances[0]; // distances from user to each destination
+      MOUNTAINS.forEach((m, i) => {
+        const key = m.lat + "," + m.lon;
+        const idx = coordMap[key];
+        const meters = distRow[idx + 1]; // +1 because index 0 is user
+        if (meters != null) {
+          drivingDistances[i] = Math.round(meters / 1609.34); // meters to miles
+        }
+      });
+    } else {
+      throw new Error("OSRM failed");
+    }
+  } catch {
+    // Fallback: straight-line from estimated or NYC location
+    const fallbackLat = 40.7128, fallbackLon = -74.0060;
+    MOUNTAINS.forEach((m, i) => {
+      drivingDistances[i] = Math.round(haversineMiles(fallbackLat, fallbackLon, m.lat, m.lon));
+    });
+  }
+
+  // Update distance tags on cards
+  MOUNTAINS.forEach((m, i) => {
+    const el = document.getElementById("dist-" + i);
+    if (el && drivingDistances[i] != null) {
+      el.textContent = drivingDistances[i] + " mi";
+    }
+  });
+
+  // Re-sort cards by driving distance
+  sortCardsByDistance();
+}
+
+function sortCardsByDistance() {
+  const grid = document.getElementById("grid");
+  const cards = Array.from(grid.querySelectorAll(".card"));
+  cards.sort((a, b) => {
+    const dA = drivingDistances[a.dataset.index] || 9999;
+    const dB = drivingDistances[b.dataset.index] || 9999;
+    return dA - dB;
+  });
+  cards.forEach(card => grid.appendChild(card));
+}
+
 // --- Weather API ---
-// Fetch daily forecast: snow, rain, precip total, hi/lo temps + current base temp
 async function fetchForecast(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
     + `&daily=snowfall_sum,rain_sum,precipitation_sum,temperature_2m_max,temperature_2m_min`
@@ -340,7 +480,6 @@ async function fetchForecast(lat, lon) {
   return resp.json();
 }
 
-// Fetch current temp at a specific elevation (for summit)
 async function fetchSummitTemp(lat, lon, elevation) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
     + `&current=temperature_2m&timezone=America%2FNew_York&temperature_unit=fahrenheit`
@@ -351,7 +490,6 @@ async function fetchSummitTemp(lat, lon, elevation) {
   return data.current ? Math.round(data.current.temperature_2m) : null;
 }
 
-// Convert units: snowfall cm→in, rain/precip mm→in
 function cmToIn(cm) { return cm != null ? cm / 2.54 : 0; }
 function mmToIn(mm) { return mm != null ? mm / 25.4 : 0; }
 
@@ -366,7 +504,6 @@ function renderForecast(index, data) {
     const snowIn = cmToIn(daily.snowfall_sum[i]);
     const rainIn = mmToIn(daily.rain_sum[i]);
     const precipIn = mmToIn(daily.precipitation_sum[i]);
-    // Ice/mix = total precip minus rain minus snow liquid equivalent (snow SWE ~10:1 ratio)
     const snowLiquidIn = snowIn / 10;
     let iceIn = precipIn - rainIn - snowLiquidIn;
     if (iceIn < 0.01) iceIn = 0;
@@ -381,7 +518,6 @@ function renderForecast(index, data) {
     const tagCls = isToday ? "tag-today" : isPast ? "tag-past" : "tag-fcast";
     const tagLabel = isToday ? "Today" : isPast ? "Past" : "Fcst";
 
-    // Build precip rows — only show types with > 0.0"
     let precipHtml = "";
     if (snowIn >= 0.05) {
       precipHtml += `<div class="precip-row snow">&#10052; ${snowIn.toFixed(1)}"</div>`;
@@ -411,8 +547,8 @@ function renderForecast(index, data) {
 function renderTempOverlay(index, baseTemp, summitTemp) {
   const el = document.getElementById("temps-" + index);
   if (!el) return;
-  const bStr = baseTemp != null ? Math.round(baseTemp) + "°F" : "--";
-  const sStr = summitTemp != null ? summitTemp + "°F" : "--";
+  const bStr = baseTemp != null ? Math.round(baseTemp) + "\u00B0F" : "--";
+  const sStr = summitTemp != null ? summitTemp + "\u00B0F" : "--";
   el.innerHTML = `<div class="temp-pill base"><span class="lbl">Base</span><span class="deg">${bStr}</span></div>`
     + `<div class="temp-pill summit"><span class="lbl">Summit</span><span class="deg">${sStr}</span></div>`;
   el.style.display = "";
@@ -434,7 +570,6 @@ async function loadAllForecasts() {
     const sKey = fKey + "," + m.summitElev;
 
     try {
-      // Forecast + base current temp (dedup by lat/lon)
       let data;
       if (seenForecast.has(fKey)) {
         data = seenForecast.get(fKey);
@@ -445,7 +580,6 @@ async function loadAllForecasts() {
       }
       renderForecast(i, data);
 
-      // Current temps overlay
       const baseTemp = data.current ? data.current.temperature_2m : null;
       let summitTemp;
       if (seenSummit.has(sKey)) {
@@ -470,6 +604,7 @@ buildControls();
 buildGrid();
 loadAllForecasts();
 startRefreshInterval();
+loadDrivingDistances(); // runs in background, sorts when ready
 </script>
 </body>
 </html>
