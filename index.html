@@ -32,6 +32,7 @@ header p{color:#8b949e;margin-top:6px;font-size:0.85rem}
 .pass-badge.epic{background:#c9372c;color:#fff}
 .pass-badge.ikon{background:#e68a00;color:#fff}
 .pass-badge.indy{background:#1a9988;color:#fff}
+.pass-badge.mc{background:#388e3c;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:18px;padding:20px;max-width:1800px;margin:0 auto}
 @media(max-width:480px){.grid{grid-template-columns:1fr;padding:12px}}
 .card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s}
@@ -52,16 +53,19 @@ header p{color:#8b949e;margin-top:6px;font-size:0.85rem}
 .cam-feed .placeholder a{color:#58a6ff;text-decoration:none;font-size:.78rem;padding:6px 16px;border:1px solid rgba(88,166,255,.3);border-radius:6px;transition:all .2s}
 .cam-feed .placeholder a:hover{background:rgba(88,166,255,.15)}
 /* Temp overlay on webcam */
-.temp-overlay{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:6px 10px;background:linear-gradient(transparent,rgba(0,0,0,.8));z-index:2;pointer-events:none}
+.temp-overlay{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:6px 10px;background:linear-gradient(transparent,rgba(0,0,0,.8));z-index:2;pointer-events:none}
 .temp-pill{font-weight:600;padding:3px 8px;border-radius:6px;backdrop-filter:blur(4px);display:flex;align-items:center;gap:4px;font-size:.7rem}
 .temp-pill.base{background:rgba(56,139,253,.3);color:#79c0ff}
 .temp-pill.summit{background:rgba(188,140,255,.3);color:#d2a8ff}
+.temp-pill.depth{background:rgba(255,255,255,.15);color:#e6edf3}
 .temp-pill .lbl{font-size:.55rem;opacity:.85;text-transform:uppercase;letter-spacing:.3px}
 .temp-pill .deg{font-size:.88rem;font-weight:700}
 .cam-updated{padding:3px 14px;font-size:.65rem;color:#484f58;font-family:monospace;border-top:1px solid #21262d}
-/* Forecast strip */
-.forecast-strip{display:flex;border-top:1px solid #30363d}
-.fday{flex:1;padding:6px 2px 5px;text-align:center;border-right:1px solid #21262d;position:relative}
+/* Forecast strip — scrollable */
+.forecast-strip{display:flex;border-top:1px solid #30363d;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#30363d transparent}
+.forecast-strip::-webkit-scrollbar{height:4px}
+.forecast-strip::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+.fday{flex:0 0 calc(100% / 6.5);min-width:0;padding:6px 2px 5px;text-align:center;border-right:1px solid #21262d;position:relative;scroll-snap-align:start}
 .fday:last-child{border-right:none}
 .fday.today{background:rgba(56,139,253,.08)}
 .fday .dt{font-size:.6rem;color:#8b949e;text-transform:uppercase;line-height:1.3}
@@ -205,9 +209,9 @@ const MOUNTAINS = [
 
 const STATE_ORDER = ["CT","NY","VT","NH","ME"];
 const STATES = STATE_ORDER.filter(s => MOUNTAINS.some(m => m.state === s));
-const PASS_TYPES = ["epic","ikon","indy"];
-const PASS_LABELS = {epic:"Epic",ikon:"Ikon",indy:"Indy"};
-const PASS_ICONS = {epic:"\u26F7",ikon:"\u2B50",indy:"\uD83C\uDFBF"};
+const PASS_TYPES = ["epic","ikon","indy","mc"];
+const PASS_LABELS = {epic:"Epic",ikon:"Ikon",indy:"Indy",mc:"Mt Collective"};
+const PASS_ICONS = {epic:"\u26F7",ikon:"\u2B50",indy:"\uD83C\uDFBF",mc:"\uD83C\uDFD4"};
 
 let activeStateFilter = "ALL";
 let activePassFilter = null;
@@ -473,21 +477,25 @@ function sortCardsByDistance() {
 async function fetchForecast(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
     + `&daily=snowfall_sum,rain_sum,precipitation_sum,temperature_2m_max,temperature_2m_min`
-    + `&current=temperature_2m`
-    + `&past_days=3&forecast_days=4&timezone=America%2FNew_York&temperature_unit=fahrenheit`;
+    + `&current=temperature_2m,snow_depth`
+    + `&past_days=3&forecast_days=14&timezone=America%2FNew_York&temperature_unit=fahrenheit`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error("HTTP " + resp.status);
   return resp.json();
 }
 
-async function fetchSummitTemp(lat, lon, elevation) {
+async function fetchSummitData(lat, lon, elevation) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
-    + `&current=temperature_2m&timezone=America%2FNew_York&temperature_unit=fahrenheit`
+    + `&current=temperature_2m,snow_depth&timezone=America%2FNew_York&temperature_unit=fahrenheit`
     + `&elevation=${elevation}`;
   const resp = await fetch(url);
-  if (!resp.ok) return null;
+  if (!resp.ok) return {temp: null, depth: null};
   const data = await resp.json();
-  return data.current ? Math.round(data.current.temperature_2m) : null;
+  const c = data.current;
+  return {
+    temp: c ? Math.round(c.temperature_2m) : null,
+    depth: c && c.snow_depth != null ? Math.round(c.snow_depth * 39.37) : null // meters to inches
+  };
 }
 
 function cmToIn(cm) { return cm != null ? cm / 2.54 : 0; }
@@ -544,12 +552,28 @@ function renderForecast(index, data) {
   el.innerHTML = html;
 }
 
-function renderTempOverlay(index, baseTemp, summitTemp) {
+function renderTempOverlay(index, baseTemp, summitTemp, baseDepth, summitDepth) {
   const el = document.getElementById("temps-" + index);
   if (!el) return;
   const bStr = baseTemp != null ? Math.round(baseTemp) + "\u00B0F" : "--";
   const sStr = summitTemp != null ? summitTemp + "\u00B0F" : "--";
+
+  // Depth pill in between base and summit
+  let depthHtml = "";
+  if (baseDepth != null || summitDepth != null) {
+    let depthStr;
+    if (baseDepth != null && summitDepth != null && baseDepth !== summitDepth) {
+      const lo = Math.min(baseDepth, summitDepth);
+      const hi = Math.max(baseDepth, summitDepth);
+      depthStr = lo + '"-' + hi + '"';
+    } else {
+      depthStr = (baseDepth ?? summitDepth) + '"';
+    }
+    depthHtml = `<div class="temp-pill depth"><span class="lbl">Depth</span><span class="deg">${depthStr}</span></div>`;
+  }
+
   el.innerHTML = `<div class="temp-pill base"><span class="lbl">Base</span><span class="deg">${bStr}</span></div>`
+    + depthHtml
     + `<div class="temp-pill summit"><span class="lbl">Summit</span><span class="deg">${sStr}</span></div>`;
   el.style.display = "";
 }
@@ -581,15 +605,16 @@ async function loadAllForecasts() {
       renderForecast(i, data);
 
       const baseTemp = data.current ? data.current.temperature_2m : null;
-      let summitTemp;
+      const baseDepth = data.current && data.current.snow_depth != null ? Math.round(data.current.snow_depth * 39.37) : null;
+      let summitData;
       if (seenSummit.has(sKey)) {
-        summitTemp = seenSummit.get(sKey);
+        summitData = seenSummit.get(sKey);
       } else {
-        summitTemp = await fetchSummitTemp(m.lat, m.lon, m.summitElev);
-        seenSummit.set(sKey, summitTemp);
+        summitData = await fetchSummitData(m.lat, m.lon, m.summitElev);
+        seenSummit.set(sKey, summitData);
         await new Promise(r => setTimeout(r, 80));
       }
-      renderTempOverlay(i, baseTemp, summitTemp);
+      renderTempOverlay(i, baseTemp, summitData.temp, baseDepth, summitData.depth);
 
     } catch (e) {
       renderError(i, e.message);
