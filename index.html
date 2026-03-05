@@ -331,7 +331,7 @@ async function fetchForecast(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
     + `&daily=snowfall_sum,rain_sum,precipitation_sum,temperature_2m_max,temperature_2m_min`
     + `&current=temperature_2m`
-    + `&past_days=3&forecast_days=3&timezone=America%2FNew_York&temperature_unit=fahrenheit`;
+    + `&past_days=3&forecast_days=4&timezone=America%2FNew_York&temperature_unit=fahrenheit`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error("HTTP " + resp.status);
   return resp.json();
