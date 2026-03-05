@@ -499,9 +499,8 @@ function buildGrid() {
 
     if (m.type === "iframe") {
       const iframe = document.createElement("iframe");
-      iframe.src = m.url;
+      iframe.dataset.src = m.url; // lazy-loaded via IntersectionObserver
       iframe.title = m.name;
-      iframe.loading = "lazy";
       iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
       iframe.allowFullscreen = true;
       feed.appendChild(iframe);
@@ -556,6 +555,26 @@ function buildGrid() {
     if (updatedDiv) card.appendChild(updatedDiv);
     card.appendChild(forecastDiv);
     grid.appendChild(card);
+  });
+}
+
+// --- Lazy-load iframes (memory optimization) ---
+const iframeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const iframe = entry.target.querySelector('iframe[data-src]');
+    if (!iframe) return;
+    if (entry.isIntersecting) {
+      if (!iframe.src) iframe.src = iframe.dataset.src;
+    } else {
+      // Unload iframes that are far off-screen to free memory
+      if (iframe.src) { iframe.src = ""; }
+    }
+  });
+}, { rootMargin: "400px 0px 400px 0px" }); // pre-load 400px before visible
+
+function observeCards() {
+  document.querySelectorAll(".card").forEach(card => {
+    if (card.querySelector('iframe[data-src]')) iframeObserver.observe(card);
   });
 }
 
@@ -659,6 +678,7 @@ function sortCardsByDistance() {
     return dA - dB;
   });
   cards.forEach(card => grid.appendChild(card));
+  observeCards(); // re-observe after reorder
 }
 
 // --- Weather API ---
@@ -815,6 +835,7 @@ async function loadAllForecasts() {
 // --- Init ---
 buildControls();
 buildGrid();
+observeCards();
 loadAllForecasts();
 startRefreshInterval();
 loadDrivingDistances(); // runs in background, sorts when ready
