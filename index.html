@@ -763,6 +763,11 @@ function sortCardsByDistance() {
   const grid = document.getElementById("grid");
   const cards = Array.from(grid.querySelectorAll(".card"));
   cards.sort((a, b) => {
+    const mA = MOUNTAINS[a.dataset.index];
+    const mB = MOUNTAINS[b.dataset.index];
+    const hasA = mA.type !== "none" ? 0 : 1;
+    const hasB = mB.type !== "none" ? 0 : 1;
+    if (hasA !== hasB) return hasA - hasB;
     const dA = drivingDistances[a.dataset.index] || 9999;
     const dB = drivingDistances[b.dataset.index] || 9999;
     return dA - dB;
